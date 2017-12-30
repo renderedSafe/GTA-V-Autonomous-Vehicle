@@ -103,7 +103,7 @@ def main(file_name, starting_value):
 def update_image():
     while not vars.stop:
         last_time = time.time()
-        img_list = pool.apply_async(grab_screen, ((0, 0, 1920, 1120),))
+        img_list = pool.map_async(grab_screen, ((0, 0, 1920, 1120),))
         lst = img_list.get()
         vars.latest_image = lst[-1]
         print('Screenshot loop FPS: {}'.format(1/(time.time() - last_time)))
@@ -114,7 +114,7 @@ class Variables:
         self.stop = False
 
 if __name__ == '__main__':
-    pool = Pool(processes=3)
+    pool = Pool(processes=5)
     vars = Variables()
     Thread(target=update_image, args=()).start()
     time.sleep(3)

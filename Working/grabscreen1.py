@@ -13,7 +13,6 @@ def grab_screen(region=None):
 
     hwin = win32gui.GetDesktopWindow()
     print(getpid())
-    print('Region passed: {}'.format(region))
     if region:
             left,top,x2,y2 = region
             width = x2 - left + 1
@@ -36,10 +35,10 @@ def grab_screen(region=None):
     img = np.fromstring(signedIntsArray, dtype='uint8')
     img.shape = (height,width,4)
 
+
     srcdc.DeleteDC()
     memdc.DeleteDC()
     win32gui.ReleaseDC(hwin, hwindc)
     win32gui.DeleteObject(bmp.GetHandle())
-    print(np.shape(img))
 
     return cv2.cvtColor(img, cv2.COLOR_BGRA2RGB)
