@@ -12,7 +12,7 @@ def get_controls(joystick):
 
     # both values get rounded to we keep things simpler
     steering_angle = round(joystick.get_axis(0), 6)
-    print(steering_angle)
+    #print(steering_angle)
     # reversing the sign of the throttle value because controller spits out -1 for full forward and 1 for full reverse
     throttle = -(round(joystick.get_axis(2), 6))
 

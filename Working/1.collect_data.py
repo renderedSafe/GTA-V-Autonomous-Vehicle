@@ -8,7 +8,7 @@ from Working.getcontrols import get_controls
 import pygame
 
 
-starting_value = 24
+starting_value = 1
 window_title_substring = 'PyCharm'
 
 pygame.init()
@@ -21,7 +21,7 @@ joystick.init()
 grabscreen_thread = GetFrameThread(0, 40, 1920, 1120, window_title_substring=window_title_substring).start()
 
 while True:
-    file_name = 'sedan-hoodview-generalizled_noncourse-training_data-{}.npy'.format(starting_value)
+    file_name = 'training_data-{}.npy'.format(starting_value)
 
     if os.path.isfile(file_name):
         print('File exists, moving along', starting_value)
@@ -44,10 +44,11 @@ def main(file_name, starting_value):
     last_time = time.time()
     paused = False
     print('STARTING!!!')
+    loops = 0
     while True:
 
         if not paused:
-            if time.time() - last_time >= .0125:  # Lets not record faster than 80 FPS
+            if time.time() - last_time >= .025:  # Lets not record faster than 40 FPS
 
                 screen = grabscreen_thread.return_frame()
                 screen = cv2.resize(screen, (480, 270))
@@ -58,9 +59,14 @@ def main(file_name, starting_value):
                 output = [steering_angle, throttle]
                 training_data.append([screen, output])
 
-                print('loop took {} seconds'.format(time.time() - last_time))
+                if loops >= 50:
+                    print('collect_data FPS: {}'.format(1/(time.time() - last_time)))
+                    print('Threading image updates FPS: {}'.format(grabscreen_thread.get_fps()))
+                    loops = 0
+                loops += 1
                 last_time = time.time()
-                #ttgrabscreen_thread.get_fps()
+
+                # grabscreen_thread.get_fps()
                 # last_time = time.time()
                 # cv2.imshow('window',cv2.resize(screen,(640,360)))
                 # if cv2.waitKey(25) & 0xFF == ord('q'):
@@ -70,7 +76,7 @@ def main(file_name, starting_value):
                 if len(training_data) % 100 == 0:
                     print(len(training_data))
 
-                    if len(training_data) == 1000:
+                    if len(training_data) == 500:
                         np.save(file_name, training_data)
                         print('SAVED')
                         training_data = []

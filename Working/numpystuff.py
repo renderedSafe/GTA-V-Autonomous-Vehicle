@@ -5,8 +5,8 @@ import math
 import matplotlib.pyplot as plt
 import scipy
 
-batch = np.load('test_training_data-1.npy')
-index = 397
+batch = np.load('training_data-1.npy')
+index = 59
 
 img = batch[index][0]
 user_input = batch[index][1]
