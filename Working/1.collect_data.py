@@ -14,7 +14,7 @@ window_title_substring = 'PyCharm'
 
 pygame.init()
 pygame.joystick.init()
-joystick = pygame.joystick.Joystick(1)
+joystick = pygame.joystick.Joystick(0)
 joystick.init()
 
 
