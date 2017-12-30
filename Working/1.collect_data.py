@@ -6,7 +6,9 @@ from Working.getFrame import GetFrameThread
 import os
 from Working.getcontrols import get_controls
 import pygame
-from Working.grabscreen import GrabScreen
+from Working.grabscreen1 import grab_screen
+from threading import Thread
+from multiprocessing import Pool
 
 
 starting_value = 1
@@ -17,9 +19,6 @@ pygame.joystick.init()
 joystick = pygame.joystick.Joystick(0)
 joystick.init()
 
-
-# creating the threading grabscreen object and starting the thread
-grabscreen_thread = GetFrameThread(0, 40, 1920, 1120, window_title_substring=window_title_substring).start()
 
 while True:
     file_name = 'training_data-{}.npy'.format(starting_value)
@@ -51,7 +50,7 @@ def main(file_name, starting_value):
         if not paused:
             if time.time() - last_time >= .0125:  # Lets not record faster than whatever
 
-                screen = grabscreen_thread.return_frame()
+                screen = vars.latest_image
                 try:
                     screen = cv2.resize(screen, (480, 270))
                 except cv2.error as e:
@@ -67,7 +66,6 @@ def main(file_name, starting_value):
 
                 if loops >= 50:
                     print('collect_data FPS: {}'.format(1/(time.time() - last_time)))
-                    print('Threading image updates FPS: {}'.format(grabscreen_thread.get_fps()))
                     loops = 0
                 loops += 1
                 last_time = time.time()
@@ -82,7 +80,7 @@ def main(file_name, starting_value):
                 if len(training_data) % 100 == 0:
                     print(len(training_data))
 
-                    if len(training_data) == 1000:
+                    if len(training_data) == 300:
                         np.save(file_name, training_data)
                         print('SAVED')
                         training_data = []
@@ -93,12 +91,31 @@ def main(file_name, starting_value):
         if 'T' in keys:
             if paused:
                 paused = False
+                vars.stop = True
                 print('unpaused!')
                 time.sleep(1)
             else:
                 print('Pausing!')
                 paused = True
+                vars.stop = False
                 time.sleep(1)
 
+def update_image():
+    while not vars.stop:
+        last_time = time.time()
+        img_list = pool.apply_async(grab_screen, ((0, 0, 1920, 1120),))
+        lst = img_list.get()
+        vars.latest_image = lst[-1]
+        print('Screenshot loop FPS: {}'.format(1/(time.time() - last_time)))
 
-main(file_name, starting_value)
+class Variables:
+    def __init__(self):
+        self.latest_image = None
+        self.stop = False
+
+if __name__ == '__main__':
+    pool = Pool(processes=3)
+    vars = Variables()
+    Thread(target=update_image, args=()).start()
+    time.sleep(3)
+    main(file_name, starting_value)
