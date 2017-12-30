@@ -6,6 +6,7 @@ from Working.getFrame import GetFrameThread
 import os
 from Working.getcontrols import get_controls
 import pygame
+from Working.grabscreen import GrabScreen
 
 
 starting_value = 1
@@ -48,16 +49,21 @@ def main(file_name, starting_value):
     while True:
 
         if not paused:
-            if time.time() - last_time >= .025:  # Lets not record faster than 40 FPS
+            if time.time() - last_time >= .0125:  # Lets not record faster than whatever
 
                 screen = grabscreen_thread.return_frame()
-                screen = cv2.resize(screen, (480, 270))
+                try:
+                    screen = cv2.resize(screen, (480, 270))
+                except cv2.error as e:
+                    print(e)
+                    screen = None
 
                 steering_angle, throttle = get_controls(joystick)
                 if abs(steering_angle) < .05:
                     steering_angle = 0
                 output = [steering_angle, throttle]
-                training_data.append([screen, output])
+                if screen is not None:
+                    training_data.append([screen, output])
 
                 if loops >= 50:
                     print('collect_data FPS: {}'.format(1/(time.time() - last_time)))
@@ -76,7 +82,7 @@ def main(file_name, starting_value):
                 if len(training_data) % 100 == 0:
                     print(len(training_data))
 
-                    if len(training_data) == 500:
+                    if len(training_data) == 1000:
                         np.save(file_name, training_data)
                         print('SAVED')
                         training_data = []

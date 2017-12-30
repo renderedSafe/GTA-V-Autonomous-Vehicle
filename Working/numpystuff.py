@@ -20,15 +20,12 @@ print('Shape of img data: {}'.format(np.shape(img)))
 # img = img.swapaxes(0,2).swapaxes(0,1)
 
 # ----------Uncomment for cv2 imshow display--------------------
-# # img = Image.fromarray(img, 'RGB')
-# # cv2.imshow('window', np.array(img))
-# # input()
+# img = Image.fromarray(img, 'RGB')
+# cv2.imshow('window', np.array(img))
+# input()
 
 
 # ---------Uncomment for matplotlib image  display---------------
 plt.imshow(img)
 plt.show()
 
-
-# print(math.copysign(.5, -.312))
-# print(math.copysign(.5, .312))
