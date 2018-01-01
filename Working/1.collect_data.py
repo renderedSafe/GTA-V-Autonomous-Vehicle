@@ -114,7 +114,7 @@ class Variables:
         self.stop = False
 
 if __name__ == '__main__':
-    pool = Pool(processes=5)
+    pool = Pool(processes=2)
     vars = Variables()
     Thread(target=update_image, args=()).start()
     time.sleep(3)
